@@ -33,3 +33,6 @@ Cuando vayan a hacer un PR entre ramas, primero hagan merge de la rama del featu
 Para el merge con la rama dev, se van a necesitar aprobaciones. Para eso las personas designadas son: Diego y (definir otra persona). Hasta que todas las personas encargadas aprueben el PR, una de ellas va a hacer merge de la rama personal y dev. 
 
 Cuando el proyecto esté en dev, se harán las pruebas necesarias para que todo funcione como debería de ser y una vez *grupalmente* se esté de acuerdo que ya el proyecto está funcional, una de las personas encargadas de hacer las aprobaciones hará merge con main y se publicará el proyecto.
+
+##Backend Architecture
+
