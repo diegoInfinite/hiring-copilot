@@ -1,17 +1,18 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-/* admin pages*/
-import AdminLayout from "../src/pages/admin/AdminLayout";
-import UsersAdminPage from "../src/pages/admin/UsersAdminPage";
 
-import HomePage from "./pages/HomePage";
-import JobDetailPage from "./pages/JobDetailPage";
-import ApplyPage from "./pages/ApplyPage";
-import LoginPage from "./pages/LoginPage";
-import HrCandidateDetailPage from "./pages/HrCandidateDetailPage"
-import HrPage from "./pages/HrPage";
+/* admin pages */
+import AdminLayout from "./UI/pages/admin/AdminLayout";
+import UsersAdminPage from "./UI/pages/admin/UsersAdminPage";
 
-import { AuthProvider } from "./auth/AuthContext";
-import ProtectedRoute from "./auth/ProtectedRoute";
+import HomePage from "./UI/pages/HomePage";
+import JobDetailPage from "./UI/pages/JobDetailPage";
+import ApplyPage from "./UI/pages/ApplyPage";
+import LoginPage from "./UI/pages/LoginPage";
+import HrCandidateDetailPage from "./UI/pages/HrCandidateDetailPage";
+import HrPage from "./UI/pages/HrPage";
+
+import { AuthProvider } from "./Features/auth/AuthContext";
+import ProtectedRoute from "./Features/auth/ProtectedRoute";
 
 export default function App() {
   return (
@@ -19,31 +20,16 @@ export default function App() {
       <BrowserRouter>
         <Routes>
 
-          {/* Página principal */}
           <Route path="/" element={<HomePage />} />
-
           <Route path="/jobs" element={<HomePage scrollTo="jobs" />} />
-
           <Route path="/contact" element={<HomePage scrollTo="contact" />} />
 
-
-          {/* Login */}
+          {/* Public */}
           <Route path="/login" element={<LoginPage />} />
-
-          {/* Vista detalle del trabajo (pública) */}
           <Route path="/job/:id" element={<JobDetailPage />} />
+          <Route path="/apply/:id" element={<ApplyPage />} />   {/* PUBLIC NOW */}
 
-          {/* Apply requiere login */}
-          <Route
-            path="/apply/:id"
-            element={
-              <ProtectedRoute>
-                <ApplyPage />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Área HR */}
+          {/* HR Protected */}
           <Route
             path="/hr"
             element={
@@ -54,15 +40,15 @@ export default function App() {
           />
 
           <Route
-          path="/hr/candidate/:id"
-          element={
-            <ProtectedRoute>
-              <HrCandidateDetailPage />
-            </ProtectedRoute>
-          }
-        />
+            path="/hr/candidate/:id"
+            element={
+              <ProtectedRoute>
+                <HrCandidateDetailPage />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Admin */}
+          {/* Admin Protected */}
           <Route
             path="/admin"
             element={
@@ -80,10 +66,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
-          
-
-          
 
         </Routes>
       </BrowserRouter>

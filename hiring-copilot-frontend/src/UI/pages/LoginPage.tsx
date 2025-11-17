@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../../Features/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
@@ -33,7 +33,7 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="bg-slate-800/70 backdrop-blur-md p-10 rounded-xl shadow-xl w-full max-w-md border border-slate-700"
       >
-        <h2 className="text-3xl font-bold mb-6 text-center">Sign in</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center">Log in</h2>
 
         {error && (
           <p className="text-red-400 text-sm mb-4 text-center">{error}</p>
