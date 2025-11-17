@@ -1,1 +1,71 @@
+name: Frontend CI/CD Pipeline
 
+# Se ejecuta solo cuando hay push a main Y hay cambios en la carpeta de frontend
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'hiring-copilot-frontend/**'
+      - '.github/workflows/frontend-pipeline.yml'
+
+# Variables de entorno
+env:
+  NODE_VERSION: '24.x'
+  AZURE_WEBAPP_PACKAGE_PATH: 'hiring-copilot-frontend/dist'
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Frontend
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      # 1. Checkout del codigo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup de Node.js 24
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'hiring-copilot-frontend/package-lock.json'
+
+      # 3. Instalar dependencias
+      - name: Install dependencies
+        working-directory: ./hiring-copilot-frontend
+        run: npm ci
+
+      # 4. Lint del codigo
+      - name: Run linter
+        working-directory: ./hiring-copilot-frontend
+        run: npm run lint
+        continue-on-error: true
+
+      # 5. Build del proyecto
+      - name: Build application
+        working-directory: ./hiring-copilot-frontend
+        run: npm run build
+
+      # 6. Verificar que dist existe
+      - name: Verify build output
+        run: |
+          if [ ! -d "hiring-copilot-frontend/dist" ]; then
+            echo "Error: dist folder not found"
+            exit 1
+          fi
+          echo "Build successful. Contents:"
+          ls -la hiring-copilot-frontend/dist
+
+      # 7. Deploy a Azure App Service
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          publish-profile: ${{ secrets.FRONTEND_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      # 8. Notificacion de exito
+      - name: Deployment successful
+        run: echo "Frontend deployed successfully to Azure!"
