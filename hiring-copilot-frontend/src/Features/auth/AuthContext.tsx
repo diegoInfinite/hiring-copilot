@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from "react";
 
 type User = {
   username: string;
-  role: "user" | "hr" | "admin";
+  role: "hr" | "admin";
 };
 
 type AuthContextType = {
@@ -20,7 +20,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const usersDB = [
     { username: "admin", password: "admin123", role: "admin" },
     { username: "hr", password: "hr123", role: "hr" },
-    { username: "user", password: "user123", role: "user" },
   ];
 
   async function login(username: string, password: string) {

@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
 
 type JobCardProps = {
   id: string | number;
@@ -10,16 +9,9 @@ type JobCardProps = {
 
 export default function JobCard({ id, title, company, location }: JobCardProps) {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   function handleApply() {
-    if (!user) {
-      // Not logged in → go to login
-      navigate("/login");
-    } else {
-      // Logged in → go to job detail
-      navigate(`/job/${id}`);
-    }
+    navigate(`/job/${id}`);
   }
 
   return (
@@ -30,11 +22,7 @@ export default function JobCard({ id, title, company, location }: JobCardProps) 
 
       <button
         onClick={handleApply}
-        className="
-          mt-4 inline-block bg-blue-600 
-          px-4 py-2 rounded-md 
-          hover:bg-blue-700 transition
-        "
+        className="mt-4 inline-block bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-700 transition"
       >
         Apply
       </button>
