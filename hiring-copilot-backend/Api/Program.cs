@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Api.Middlewares;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Text.Json;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Infrastructure.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +25,13 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 
 // Register JwtProvider as singleton
 builder.Services.AddSingleton<JwtProvider>();
+
+// ✅ Add Health Checks (sin AddDbContextCheck)
+builder.Services.AddHealthChecks()
+    // Database health check personalizado
+    .AddCheck<DatabaseHealthCheck>("database", tags: new[] { "ready" })
+    // Basic liveness check
+    .AddCheck("basic", () => HealthCheckResult.Healthy("API is running"), tags: new[] { "live" });
 
 // Add Authentication with JWT Bearer
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
@@ -63,7 +74,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(); 
+    app.UseSwagger();
     app.UseErrorHandlingMiddleware();
     app.UseSwaggerUI();
 }
@@ -75,4 +86,69 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// ✅ Map Health Check Endpoints
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = WriteHealthCheckResponse,
+    Predicate = check => check.Tags.Contains("live") || check.Tags.Count == 0
+});
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    ResponseWriter = WriteHealthCheckResponse,
+    Predicate = check => check.Tags.Contains("ready")
+});
+
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    ResponseWriter = WriteHealthCheckResponse,
+    Predicate = check => check.Tags.Contains("live")
+});
+
+// ✅ Simple health endpoint
+app.MapGet("/api/health", () =>
+{
+    var healthInfo = new
+    {
+        status = "Healthy",
+        service = "Hiring Copilot API",
+        timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+        version = "1.0.0",
+        environment = app.Environment.EnvironmentName
+    };
+
+    return Results.Ok(healthInfo);
+});
+
 app.Run();
+
+// ✅ Health Check Response Writer
+static Task WriteHealthCheckResponse(HttpContext context, HealthReport result)
+{
+    context.Response.ContentType = "application/json; charset=utf-8";
+
+    var response = new
+    {
+        status = result.Status.ToString(),
+        service = "Hiring Copilot API",
+        checks = result.Entries.Select(entry => new
+        {
+            name = entry.Key,
+            status = entry.Value.Status.ToString(),
+            description = entry.Value.Description,
+            duration = $"{entry.Value.Duration.TotalMilliseconds}ms",
+            exception = entry.Value.Exception?.Message
+        }),
+        totalDuration = $"{result.TotalDuration.TotalMilliseconds}ms",
+        timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+        environment = context.RequestServices.GetRequiredService<IWebHostEnvironment>().EnvironmentName
+    };
+
+    var options = new JsonSerializerOptions
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    return context.Response.WriteAsync(JsonSerializer.Serialize(response, options));
+}
