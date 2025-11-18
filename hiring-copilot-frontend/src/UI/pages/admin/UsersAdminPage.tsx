@@ -5,17 +5,36 @@ import UserModal from "../../components/UserModal";
 import ConfirmModal from "../../components/ConfirmModal";
 
 type User = {
-  id: number;
-  username: string;
-  role: string;
-  active: boolean;
+  id: string;
+  email: string;
+  name: string;
+  role: "admin" | "interviewer" | "recruiter";
+  is_active: boolean;
 };
 
-// Mock data (later replaced by .NET API)
+// Mock data (simulating DB records)
 const initialUsers: User[] = [
-  { id: 1, username: "admin", role: "admin", active: true },
-  { id: 2, username: "hector", role: "hr", active: true },
-  { id: 3, username: "maria", role: "hr", active: false },
+  {
+    id: crypto.randomUUID(),
+    email: "admin@example.com",
+    name: "System Admin",
+    role: "admin",
+    is_active: true,
+  },
+  {
+    id: crypto.randomUUID(),
+    email: "hector@example.com",
+    name: "Héctor Jiménez",
+    role: "recruiter",
+    is_active: true,
+  },
+  {
+    id: crypto.randomUUID(),
+    email: "maria@example.com",
+    name: "María Solís",
+    role: "interviewer",
+    is_active: false,
+  },
 ];
 
 export default function UsersAdminPage() {
@@ -27,49 +46,60 @@ export default function UsersAdminPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null);
 
+  // CREATE MODAL
   function openCreateModal() {
     setEditingUser(null);
     setShowModal(true);
   }
 
+  // EDIT MODAL
   function openEditModal(user: User) {
     setEditingUser(user);
     setShowModal(true);
   }
 
+  // DEACTIVATE MODAL
   function openDeactivateModal(user: User) {
     setUserToDeactivate(user);
     setShowConfirm(true);
   }
 
-  function saveUser(userData: Partial<User>) {
-    if (editingUser) {
-      // Update
-      setUsers(
-        users.map((u) =>
-          u.id === editingUser.id ? { ...u, ...userData } : u
-        )
-      );
-    } else {
-      // Create
-      const newUser: User = {
-        id: Date.now(),
-        username: userData.username || "",
-        role: userData.role || "hr",
-        active: true,
-      };
-      setUsers([...users, newUser]);
-    }
+  // SAVE (create or update)
+  function saveUser(data: { email: string; name: string; role: string }) {
+  const role = data.role as User["role"]; // CAST SEGURO
 
-    setShowModal(false);
+  if (editingUser) {
+    // Update
+    setUsers(
+      users.map((u) =>
+        u.id === editingUser.id
+          ? { ...u, ...data, role } // role corregido
+          : u
+      )
+    );
+  } else {
+    // Create
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      email: data.email,
+      name: data.name,
+      role, // ya está casteado correctamente
+      is_active: true,
+    };
+    setUsers([...users, newUser]);
   }
 
+  setShowModal(false);
+}
+
+
+  // SOFT DELETE
   function deactivateUser() {
     if (!userToDeactivate) return;
 
     setUsers(
       users.map((u) =>
-        u.id === userToDeactivate.id ? { ...u, active: false } : u
+        u.id === userToDeactivate.id ? { ...u, is_active: false } : u
       )
     );
 
@@ -94,7 +124,8 @@ export default function UsersAdminPage() {
           <table className="w-full">
             <thead className="bg-slate-800">
               <tr>
-                <th className="p-3 text-left">User</th>
+                <th className="p-3 text-left">Name</th>
+                <th className="p-3 text-left">Email</th>
                 <th className="p-3 text-left">Role</th>
                 <th className="p-3 text-left">Status</th>
                 <th className="p-3 text-left">Actions</th>
@@ -107,10 +138,11 @@ export default function UsersAdminPage() {
                   key={user.id}
                   className="border-t border-slate-800 hover:bg-slate-800/50"
                 >
-                  <td className="p-3">{user.username}</td>
+                  <td className="p-3">{user.name}</td>
+                  <td className="p-3">{user.email}</td>
                   <td className="p-3 capitalize">{user.role}</td>
                   <td className="p-3">
-                    {user.active ? (
+                    {user.is_active ? (
                       <span className="text-green-400">Active</span>
                     ) : (
                       <span className="text-red-400">Inactive</span>
@@ -125,7 +157,7 @@ export default function UsersAdminPage() {
                       Edit
                     </button>
 
-                    {user.active && (
+                    {user.is_active && (
                       <button
                         onClick={() => openDeactivateModal(user)}
                         className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded"
@@ -155,7 +187,7 @@ export default function UsersAdminPage() {
         <ConfirmModal
           onClose={() => setShowConfirm(false)}
           onConfirm={deactivateUser}
-          message={`Do you want to deactivate the user "${userToDeactivate?.username}"?`}
+          message={`Do you want to deactivate the user "${userToDeactivate?.name}"?`}
         />
       )}
     </div>
