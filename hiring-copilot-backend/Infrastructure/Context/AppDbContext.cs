@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using Infrastructure.Persistence;
+using Infrastructure.Config;
 
 namespace Infrastructure.Context
 {

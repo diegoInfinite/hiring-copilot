@@ -1,10 +1,10 @@
-using Infrastructure.Context;
-using Infrastructure.Security;
+﻿using Infrastructure.Context;
 using Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +23,11 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 builder.Services.AddSingleton<JwtProvider>();
 
 // Add Authentication with JWT Bearer
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
+    ?? throw new Exception("❌ JwtSettings section missing in appsettings.json");
+
+var key = Encoding.UTF8.GetBytes(jwtSettings.Secret
+    ?? throw new Exception("❌ JwtSettings:Secret missing"));
 
 builder.Services.AddAuthentication(options =>
 {

@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Infrastructure.Security;
+using Infrastructure.Config;
+using Infrastructure.Context;
 using System.Linq;
 using System;
 
