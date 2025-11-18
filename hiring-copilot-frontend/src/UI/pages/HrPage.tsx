@@ -47,11 +47,37 @@ const initialCandidates: Candidate[] = [
     score: 76,
     stage: "L1 Interview",
   },
+   {
+    id: 3,
+    name: "Pedro Jimenez",
+    email: "pedro@example.com",
+    job: "DevOps Engineer",
+    score: 76,
+    stage: "L1 Interview",
+  },
+   {
+    id: 3,
+    name: "Pedro Jimenez",
+    email: "pedro@example.com",
+    job: "DevOps Engineer",
+    score: 76,
+    stage: "L1 Interview",
+  },
+   {
+    id: 4,
+    name: "Pedro Jimenez",
+    email: "pedro@example.com",
+    job: "DevOps Engineer",
+    score: 76,
+    stage: "L1 Interview",
+  },
+  
 ];
 
 export default function HrPage() {
   const navigate = useNavigate();
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
+  const [open, setOpen] = useState(true);
 
   //Filter for job("All default")
   const [selectedJob,setSelectedJob] = useState<string>("All");
@@ -83,7 +109,6 @@ export default function HrPage() {
    return (
     <div className="bg-slate-950 min-h-screen flex flex-col text-white">
       <Navbar />
-
       <main className="flex-grow container mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           <h1 className="text-3xl font-bold">Recruitment Dashboard (HR)</h1>
