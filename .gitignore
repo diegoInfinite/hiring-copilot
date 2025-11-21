@@ -346,4 +346,3 @@ ServiceFabricBackup/
 
 ## User secrets
 secrets.json
-appsettings.Development.json

@@ -9,11 +9,12 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Infrastructure.HealthChecks;
+using Api.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // -----------------------------
-// Configure Services
+// Configure Services and CORS
 // -----------------------------
 
 // Configure DbContext with Neon/PostgreSQL connection
@@ -33,6 +34,19 @@ builder.Services.AddHealthChecks()
     // Basic liveness check
     .AddCheck("basic", () => HealthCheckResult.Healthy("API is running"), tags: new[] { "live" });
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicies.Frontend, policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 // Add Authentication with JWT Bearer
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
     ?? throw new Exception("❌ JwtSettings section missing in appsettings.json");
@@ -80,7 +94,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors(CorsPolicies.Frontend);
 app.UseAuthentication();
 app.UseAuthorization();
 
