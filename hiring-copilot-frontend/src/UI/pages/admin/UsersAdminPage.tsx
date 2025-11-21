@@ -24,7 +24,7 @@ const initialUsers: User[] = [
   {
     id: crypto.randomUUID(),
     email: "hector@example.com",
-    name: "Héctor Jiménez",
+    name: "Héctor JiméneSSSSz",
     role: "recruiter",
     is_active: true,
   },
